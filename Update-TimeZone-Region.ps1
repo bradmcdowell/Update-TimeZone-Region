@@ -1,8 +1,7 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-# Define your list of hostnames
-# $computers = @("DC1", "WIN-SVR1")
+$tzRegionLogonScript = "C:\Install\tz-region-logon.ps1"
 
 # --- Region definitions ---
 $regions = @{
@@ -67,7 +66,7 @@ $timezoneDropdown.SelectedItem = "(UTC+10:00) Canberra, Melbourne, Sydney"
 
 # Apply to others label & dropdown
 $remoteLabel = New-Object System.Windows.Forms.Label
-$remoteLabel.Text = "Apply to other lab computers?"
+$remoteLabel.Text = "Update logon script at $tzRegionLogonScript ?"
 $remoteLabel.Location = New-Object System.Drawing.Point(20,160)
 $remoteLabel.AutoSize = $true
 
@@ -76,47 +75,13 @@ $remoteDropdown.Location = New-Object System.Drawing.Point(20,185)
 $remoteDropdown.Size = New-Object System.Drawing.Size(420,30)
 $remoteDropdown.DropDownStyle = 'DropDownList'
 $remoteDropdown.Items.AddRange(@("No", "Yes"))
-$remoteDropdown.SelectedItem = "No"
+$remoteDropdown.SelectedItem = "Yes"
 
 # Apply button
 $applyButton = New-Object System.Windows.Forms.Button
 $applyButton.Text = "Apply"
 $applyButton.Location = New-Object System.Drawing.Point(180,230)
 $applyButton.Size = New-Object System.Drawing.Size(100,30)
-
-# $applyButton.Add_Click({
-#     $selectedRegion = $regions[$regionDropdown.SelectedItem]
-#     $selectedTimezoneDisplay = $timezoneDropdown.SelectedItem
-
-#     if (-not $selectedRegion -or -not $selectedTimezoneDisplay) {
-#         [System.Windows.Forms.MessageBox]::Show("Please select both region and timezone.","Missing Selection",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Warning)
-#         return
-#     }
-
-#     $selectedTimezoneId = $tzMap[$selectedTimezoneDisplay]
-
-#     try {
-#         Set-WinSystemLocale -SystemLocale $selectedRegion.SystemLocale
-#         Set-WinUserLanguageList -LanguageList @($selectedRegion.LanguageList) -Force
-#         Set-Culture -CultureInfo $selectedRegion.Culture
-#         Set-WinHomeLocation -GeoId $selectedRegion.GeoId
-#         Set-TimeZone -Id $selectedTimezoneId
-
-#         [System.Windows.Forms.MessageBox]::Show("Region and Timezone applied to local machine successfully.","Success",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
-
-#         if ($applyToOthers) {
-#             [System.Windows.Forms.MessageBox]::Show("Apply to others Enabled.","Success",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
-#         } else {
-#             [System.Windows.Forms.MessageBox]::Show("Apply to others Not Selected.","Success",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
-#         }
-
-#         $form.Close()
-#     } catch {
-#         [System.Windows.Forms.MessageBox]::Show("Error applying settings:`n$_","Error",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Error)
-#     }
-# })
-
-
 
 $applyButton.Add_Click({
     $selectedRegion = $regions[$regionDropdown.SelectedItem]
@@ -140,11 +105,12 @@ $applyButton.Add_Click({
         [System.Windows.Forms.MessageBox]::Show("Region and Timezone applied to local machine successfully.","Success",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
 
         if ($applyToOthers) {
-            [System.Windows.Forms.MessageBox]::Show("Apply to others Enabled.","Success",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
+            [System.Windows.Forms.MessageBox]::Show("Updated logon script at $tzRegionLogonScript .","Success",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
 
-            $tzRegionLogonScript = "C:\Install\tz-region-logon.ps1"
-
+            
+            $ScriptRunTime = Get-Date
 $tzRegionlogonScriptContent = @"
+# This logon script was updated by the Update-TimeZone-Region script at $ScriptRunTime
 Set-WinSystemLocale -SystemLocale $($selectedRegion.SystemLocale)
 Set-WinUserLanguageList -LanguageList @('$($selectedRegion.LanguageList)') -Force
 Set-Culture -CultureInfo $($selectedRegion.Culture)
@@ -152,7 +118,7 @@ Set-WinHomeLocation -GeoId $($selectedRegion.GeoId)
 Set-TimeZone -Id "$selectedTimezoneId"
 "@
 
-Set-Content -Path $tzRegionLogonScript -Value $tzRegionlogonScriptConten -Force
+Set-Content -Path $tzRegionLogonScript -Value $tzRegionlogonScriptContent -Force
 
         } else {
             [System.Windows.Forms.MessageBox]::Show("Apply to others Not Selected.","Success",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
