@@ -141,6 +141,19 @@ $applyButton.Add_Click({
 
         if ($applyToOthers) {
             [System.Windows.Forms.MessageBox]::Show("Apply to others Enabled.","Success",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
+
+            $tzRegionLogonScript = "C:\Install\tz-region-logon.ps1"
+
+$tzRegionlogonScriptContent = @"
+Set-WinSystemLocale -SystemLocale $($selectedRegion.SystemLocale)
+Set-WinUserLanguageList -LanguageList @('$($selectedRegion.LanguageList)') -Force
+Set-Culture -CultureInfo $($selectedRegion.Culture)
+Set-WinHomeLocation -GeoId $($selectedRegion.GeoId)
+Set-TimeZone -Id "$selectedTimezoneId"
+"@
+
+Set-Content -Path $tzRegionLogonScript -Value $tzRegionlogonScriptConten -Force
+
         } else {
             [System.Windows.Forms.MessageBox]::Show("Apply to others Not Selected.","Success",[System.Windows.Forms.MessageBoxButtons]::OK,[System.Windows.Forms.MessageBoxIcon]::Information)
         }
