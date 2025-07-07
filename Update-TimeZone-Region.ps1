@@ -1,7 +1,7 @@
 Add-Type -AssemblyName System.Windows.Forms
 Add-Type -AssemblyName System.Drawing
 
-$tzRegionLogonScript = "C:\Install\tz-region-logon.ps1"
+$tzRegionLogonScript = "\\dc01\Distribution\tzRegion\tz-region-logon.ps1"
 
 # --- Region definitions ---
 $regions = @{
