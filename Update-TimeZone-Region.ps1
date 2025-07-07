@@ -48,7 +48,10 @@ $regionDropdown = New-Object System.Windows.Forms.ComboBox
 $regionDropdown.Location = New-Object System.Drawing.Point(20,45)
 $regionDropdown.Size = New-Object System.Drawing.Size(390,30)
 $regionDropdown.DropDownStyle = 'DropDownList'
-$regionDropdown.Items.AddRange($regions.Keys)
+#$regionDropdown.Items.AddRange($regions.Keys)
+foreach ($regionName in $regions.Keys) {
+    $regionDropdown.Items.Add($regionName)
+}
 $regionDropdown.SelectedItem = "Australia (en-AU)"  # Optional default
 
 # Timezone label & dropdown
